@@ -48,29 +48,8 @@ class AppRecommendAPI(APIView):
         )
     
     def get(self, request):
-        # 어플들을 레벨의 내림차순으로 정렬
-        applist = list(AppInfo.objects.all().order_by('level__level_value', 'id'))
-
-        # 레벨이 같은 어플들을 랜덤하게 섞음
-        grouped_applist = []
-        current_group = []
-        prev_level = None
-
-        for app in applist:
-            if prev_level is None or app.level.level_value == prev_level:
-                current_group.append(app)
-            else:
-                random.shuffle(current_group)
-                grouped_applist.extend(current_group)
-                current_group = [app]
-            prev_level = app.level.level_value
-
-        if current_group:
-            random.shuffle(current_group)
-            grouped_applist.extend(current_group)
-
-        # 상위 4개의 어플만 선택
-        applist = grouped_applist[:4]
+        # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
+        applist = AppInfo.objects.all().order_by('level__level_value', '?')[:4]
 
         appserializer = AppSerializer(applist, many=True)
         return Response(appserializer.data, status=status.HTTP_200_OK)
