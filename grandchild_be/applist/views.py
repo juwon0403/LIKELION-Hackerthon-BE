@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -42,29 +42,43 @@ class AppListAPI(APIView):
 # 추천페이지 - 어플 4개
 class AppRecommendAPI(APIView):
     @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT, 
+            properties={
+                'search': openapi.Schema(type=openapi.TYPE_STRING, description="태그 이름")
+            }
+        ),
             responses = {
-                200: openapi.Response('어플 추천 완료', AppSerializer)
+                200: openapi.Response('해당 태그와 관련된 어플들을 레벨 오름차순+같은 레벨일경우 랜덤으로 4개까지 정렬', AppSerializer)
             }
         )
-    
-    def get(self, request):
+    def post(self,request):
+        category=request.data.get('field')
         # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
-        applist = AppInfo.objects.all().order_by('level__level_value', '?')[:4]
-
+        applist=AppInfo.objects.filter(field__name__icontains=category).order_by('level__level_value', '?')[:4]
         appserializer = AppSerializer(applist, many=True)
         return Response(appserializer.data, status=status.HTTP_200_OK)
+
+    #def get(self, request):
+        # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
+     #   applist = AppInfo.objects.all().order_by('level__level_value', '?')[:4]
+      #  appserializer = AppSerializer(applist, many=True)
+       # return Response(appserializer.data, status=status.HTTP_200_OK)
 
 
 # 어플 상세페이지
 class AppDetailAPI(APIView):
     @swagger_auto_schema(
+        
             responses = {
                 200: openapi.Response('어플 상세페이지 조회 완료', AppSerializer)
             }
         )
     
-    def get(self, request):
-        app = AppInfo.objects.all()
-        appserializer = AppSerializer(app, many=True)
+    def get(self, request,pk):
+        app = get_object_or_404(AppInfo, pk = pk)
+        appserializer = AppSerializer(app)
 
         return Response(appserializer.data, status=status.HTTP_200_OK)
+    
+    

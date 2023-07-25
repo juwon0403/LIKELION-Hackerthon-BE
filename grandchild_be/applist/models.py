@@ -11,6 +11,13 @@ class AppLevel(models.Model):
     
     class Meta:
         verbose_name_plural = "AppLevel"
+        
+# 카테고리 리스트
+class CategoryTag(models.Model):
+    name=models.CharField(max_length=20)
+    
+    def __str__(self):
+        return self.name
 
 # 어플 정보
 class AppInfo(models.Model):
@@ -21,10 +28,11 @@ class AppInfo(models.Model):
     detail = models.TextField()
     link = models.TextField()
     is_downloaded = models.BooleanField() # True일 경우, 추천페이지에서 제외
-    field = models.CharField(max_length=20) # 추천페이지에서 사용
+    field = models.ManyToManyField(CategoryTag,related_name='tag') # 추천페이지에서 사용
 
     def __str__(self):
         return f"{self.name} : Level {self.level.level_value}"
     
     class Meta:
         verbose_name_plural = "AppInfo"
+        

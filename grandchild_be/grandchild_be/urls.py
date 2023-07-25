@@ -23,6 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('leveltest/', TestAPIView.as_view(), name='testapi'),
     path('recommend/', AppRecommendAPI.as_view(), name='recommendapi'),
-    path('detail/', AppDetailAPI.as_view(), name='detailapi'),
+    path('detail/<int:pk>', AppDetailAPI.as_view(), name='detailapi'),
     path('applist/', AppListAPI.as_view(), name='listapi')
 ]
