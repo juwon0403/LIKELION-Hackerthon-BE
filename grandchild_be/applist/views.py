@@ -8,6 +8,9 @@ from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from django.db.models import F
+import random
+
 
 # 카테고리 페이지
 class AppListAPI(APIView):
@@ -45,24 +48,32 @@ class AppRecommendAPI(APIView):
         )
     
     def get(self, request):
-        # level_value가 적은 순서대로 AppInfo 모델 데이터를 가져옴
-        app_info_queryset = AppInfo.objects.all().order_by('level__level_value')
+        # 어플들을 레벨의 내림차순으로 정렬
+        applist = list(AppInfo.objects.all().order_by('level__level_value', 'id'))
 
-        # level_value가 같은 데이터들의 ID를 랜덤으로 섞어서 리스트로 변환
-        random_level_value_ids = (
-            app_info_queryset
-            .order_by('?')  # 랜덤 순서
-            .values_list('id', flat=True)
-        )
+        # 레벨이 같은 어플들을 랜덤하게 섞음
+        grouped_applist = []
+        current_group = []
+        prev_level = None
 
-        # 추천할 데이터의 ID 리스트
-        recommended_ids = random_level_value_ids[:4]
+        for app in applist:
+            if prev_level is None or app.level.level_value == prev_level:
+                current_group.append(app)
+            else:
+                random.shuffle(current_group)
+                grouped_applist.extend(current_group)
+                current_group = [app]
+            prev_level = app.level.level_value
 
-        # 추천할 데이터들을 ID 리스트를 기준으로 조회
-        recommended_apps = AppInfo.objects.filter(id__in=recommended_ids)
+        if current_group:
+            random.shuffle(current_group)
+            grouped_applist.extend(current_group)
 
-        serializer = AppSerializer(recommended_apps, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # 상위 4개의 어플만 선택
+        applist = grouped_applist[:4]
+
+        appserializer = AppSerializer(applist, many=True)
+        return Response(appserializer.data, status=status.HTTP_200_OK)
 
 
 # 어플 상세페이지

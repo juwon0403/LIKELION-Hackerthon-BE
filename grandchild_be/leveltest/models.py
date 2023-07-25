@@ -9,7 +9,7 @@ class Test(models.Model):
     result = models.CharField(max_length=10, null=True, blank=True) # 회원등급
 
     def __str__(self):
-        return f"총 {self.count}점"
+        return f"총 {self.count}점 : {self.result}"
     
     def get_count(self):
         return self.count

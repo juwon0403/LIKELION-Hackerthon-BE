@@ -7,7 +7,7 @@ class AppLevel(models.Model):
     level_comment = models.CharField(max_length=20) # 별 개수에 따른 코멘트
 
     def __str__(self):
-        return self.level_comment
+        return f"Level {self.level_value} : {self.level_comment}"
     
     class Meta:
         verbose_name_plural = "AppLevel"
@@ -24,7 +24,7 @@ class AppInfo(models.Model):
     field = models.CharField(max_length=20) # 추천페이지에서 사용
 
     def __str__(self):
-        return self.name
+        return f"{self.name} : Level {self.level.level_value}"
     
     class Meta:
         verbose_name_plural = "AppInfo"
