@@ -6,7 +6,26 @@ from rest_framework import status
 from .models import Test
 from .serializers import TestSerializer
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 class TestAPIView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT, 
+            properties={
+                'q1': openapi.Schema(type=openapi.TYPE_STRING, description="첫번째 질문"),
+                'q2': openapi.Schema(type=openapi.TYPE_STRING, description="두번째 질문"),
+                'q3': openapi.Schema(type=openapi.TYPE_STRING, description="세번째 질문"),
+                'q4': openapi.Schema(type=openapi.TYPE_STRING, description="네번째 질문"),
+                'q5': openapi.Schema(type=openapi.TYPE_STRING, description="다섯번째 질문"),
+            }
+        ),
+            responses = {
+                200: openapi.Response('q1~q5의 O/X 개수에 따른 등급', TestSerializer)
+            }
+        )
+    
     def post(self, request, format=None):
         # 폼에서 전송된 데이터를 받아옵니다.
         q1_answer = request.data.get('q1')

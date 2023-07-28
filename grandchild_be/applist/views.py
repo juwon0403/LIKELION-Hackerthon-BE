@@ -16,7 +16,7 @@ import random
 class AppListAPI(APIView):
     @swagger_auto_schema(
             responses = {
-                200: openapi.Response('모든 어플 조회 완료', AppSerializer)
+                200: openapi.Response('모든 어플 조회 완료 : 추천어플(top_app)과 레벨별 어플(level_0, level_1, level_2, level_3_4, level_5) 구분하여 전송', AppSerializer)
             }
         )
     
@@ -45,33 +45,27 @@ class AppRecommendAPI(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT, 
             properties={
-                'field': openapi.Schema(type=openapi.TYPE_STRING, description="태그 이름")
+                'field': openapi.Schema(type=openapi.TYPE_STRING, description="추천페이지의 최하위 분류명")
             }
         ),
             responses = {
-                200: openapi.Response('해당 태그와 관련된 어플들을 레벨 오름차순+같은 레벨일경우 랜덤으로 4개까지 정렬', AppSerializer)
+                200: openapi.Response('입력받은 field와 관련된 어플 4가지 정렬 : 레벨 오름차순 + 같은 레벨일경우 랜덤', AppSerializer)
             }
         )
+    
     def post(self,request):
-        category=request.data.get('field')
+        field=request.data.get('field')
         # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
-        applist=AppInfo.objects.filter(field__name__icontains=category).order_by('level__level_value', '?')[:4]
+        applist=AppInfo.objects.filter(field__name__icontains=field).order_by('level__level_value', '?')[:4]
         appserializer = AppSerializer(applist, many=True)
         return Response(appserializer.data, status=status.HTTP_200_OK)
-
-    #def get(self, request):
-        # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
-     #   applist = AppInfo.objects.all().order_by('level__level_value', '?')[:4]
-      #  appserializer = AppSerializer(applist, many=True)
-       # return Response(appserializer.data, status=status.HTTP_200_OK)
 
 
 # 어플 상세페이지
 class AppDetailAPI(APIView):
     @swagger_auto_schema(
-        
             responses = {
-                200: openapi.Response('어플 상세페이지 조회 완료', AppSerializer)
+                200: openapi.Response('id에 따른 어플 상세페이지 조회 완료', AppSerializer)
             }
         )
     

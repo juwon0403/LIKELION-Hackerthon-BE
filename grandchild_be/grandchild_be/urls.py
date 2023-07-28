@@ -26,11 +26,12 @@ from rest_framework.permissions import AllowAny
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+
 schema_view = get_schema_view(
     openapi.Info(
-        title = "손자야~ Swagger",
+        title = "손자야~",
         default_version = "v1",
-        description = "Swagger를 사용한 '손자야~' API 문서입니다",
+        description = "Swagger를 사용한 '손자야~' API 문서",
     ),
     public=True,
     permission_classes=(AllowAny,),
