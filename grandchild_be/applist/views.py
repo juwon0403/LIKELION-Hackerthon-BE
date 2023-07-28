@@ -15,6 +15,7 @@ import random
 # 카테고리 페이지
 class AppListAPI(APIView):
     @swagger_auto_schema(
+            tags = ['카테고리 페이지 : 모든 어플 조회'],
             responses = {
                 200: openapi.Response('모든 어플 조회 완료 : 추천어플(top_app)과 레벨별 어플(level_0, level_1, level_2, level_3_4, level_5) 구분하여 전송', AppSerializer)
             }
@@ -42,6 +43,7 @@ class AppListAPI(APIView):
 # 추천페이지 - 어플 4개
 class AppRecommendAPI(APIView):
     @swagger_auto_schema(
+        tags = ['추천 페이지 : 어플 4가지 추천'],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT, 
             properties={
@@ -64,6 +66,7 @@ class AppRecommendAPI(APIView):
 # 어플 상세페이지
 class AppDetailAPI(APIView):
     @swagger_auto_schema(
+            tags = ['상세 페이지 : 어플 상세조회'],
             responses = {
                 200: openapi.Response('id에 따른 어플 상세페이지 조회 완료', AppSerializer)
             }

@@ -11,6 +11,7 @@ from drf_yasg import openapi
 
 class TestAPIView(APIView):
     @swagger_auto_schema(
+        tags = ['테스트 페이지 : 디지털 활용 능력 테스트'],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT, 
             properties={
