@@ -45,7 +45,7 @@ class AppRecommendAPI(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT, 
             properties={
-                'search': openapi.Schema(type=openapi.TYPE_STRING, description="태그 이름")
+                'field': openapi.Schema(type=openapi.TYPE_STRING, description="태그 이름")
             }
         ),
             responses = {
