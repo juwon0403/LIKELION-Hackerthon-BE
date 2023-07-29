@@ -27,6 +27,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
 
+
 schema_view = get_schema_view(
     openapi.Info(
         title = "손자야~",
@@ -37,12 +38,15 @@ schema_view = get_schema_view(
     permission_classes=(AllowAny,),
 )
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('leveltest/', TestAPIView.as_view(), name='testapi'),
     path('recommend/', AppRecommendAPI.as_view(), name='recommendapi'),
     path('detail/<int:pk>', AppDetailAPI.as_view(), name='detailapi'),
     path('applist/', AppListAPI.as_view(), name='listapi'),
+    # TTS 파일 다운로드를 위한 URL 패턴
+    path('tts-file/', tts_file_view, name='tts_file'),
 
     # Swagger url
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
