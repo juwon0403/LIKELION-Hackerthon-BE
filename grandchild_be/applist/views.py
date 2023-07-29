@@ -83,7 +83,7 @@ class AppDetailAPI(APIView):
     @swagger_auto_schema(
          tags = ['상세 페이지 : 어플 상세조회'],
             responses = {
-                200: openapi.Response('id에 따른 어플 상세페이지 조회 완료 app_info는 어플정보, tts는 음성파일. ', AppSerializer)
+                200: openapi.Response('id에 따른 어플 상세페이지 조회 완료 app_info는 어플정보 아래 app은 app_info가 감싸고 있음, tts는 음성파일. ', AppSerializer)
             }
         )
     
