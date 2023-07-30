@@ -40,7 +40,8 @@ class AppInfo(models.Model):
     level = models.ForeignKey(AppLevel, on_delete=models.CASCADE, related_name='levels')
     summary = models.CharField(max_length=200)
     detail = models.TextField()
-    link = models.TextField()
+    slink = models.TextField(null=True, blank=True)
+    alink = models.TextField(null=True, blank=True)
     is_downloaded = models.BooleanField() # True일 경우, 추천페이지에서 제외
     field = models.ManyToManyField(CategoryTag,related_name='tag') # 추천페이지에서 사용
 
@@ -49,4 +50,3 @@ class AppInfo(models.Model):
     
     class Meta:
         verbose_name_plural = "App Info"
-        
