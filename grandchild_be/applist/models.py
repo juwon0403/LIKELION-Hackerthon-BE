@@ -10,7 +10,17 @@ class AppLevel(models.Model):
         return f"Level {self.level_value} : {self.level_comment}"
     
     class Meta:
-        verbose_name_plural = "AppLevel"
+        verbose_name_plural = "App Level"
+
+# 기종 구분
+class PhoneModel(models.Model):
+    name = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Phone Model"
         
 # 카테고리 리스트
 class CategoryTag(models.Model):
@@ -18,11 +28,15 @@ class CategoryTag(models.Model):
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name_plural = "Category Tags"
 
 # 어플 정보
 class AppInfo(models.Model):
     name = models.CharField(max_length=30)
     image = models.ImageField(upload_to='images/')
+    model = models.ManyToManyField(PhoneModel, related_name='phonemodel')
     level = models.ForeignKey(AppLevel, on_delete=models.CASCADE, related_name='levels')
     summary = models.CharField(max_length=200)
     detail = models.TextField()
@@ -34,5 +48,5 @@ class AppInfo(models.Model):
         return f"{self.name} : Level {self.level.level_value}"
     
     class Meta:
-        verbose_name_plural = "AppInfo"
+        verbose_name_plural = "App Info"
         
