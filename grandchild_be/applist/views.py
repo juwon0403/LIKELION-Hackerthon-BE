@@ -27,7 +27,27 @@ class AppListAPI(APIView):
         )
     
     def get(self, request):
-        top_app = AppInfo.objects.all().order_by('?')
+        top_app = AppInfo.objects.filter(is_downloaded=True).order_by('?')
+        level_0 = AppInfo.objects.filter(level__level_value=0)
+        level_1 = AppInfo.objects.filter(level__level_value=1)
+        level_2 = AppInfo.objects.filter(level__level_value=2)
+        level_3_4 = AppInfo.objects.filter(level__level_value__in=[3, 4])
+        level_5 = AppInfo.objects.filter(level__level_value=5)
+
+        data = {
+            "top_app": AppSerializer(top_app, many=True, context={'request': request}).data,
+            "level_0": AppSerializer(level_0, many=True, context={'request': request}).data,
+            "level_1": AppSerializer(level_1, many=True, context={'request': request}).data,
+            "level_2": AppSerializer(level_2, many=True, context={'request': request}).data,
+            "level_3_4": AppSerializer(level_3_4, many=True, context={'request': request}).data,
+            "level_5": AppSerializer(level_5, many=True, context={'request': request}).data,
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    
+    '''def get(self, request):
+        top_app = AppInfo.objects.filter(is_downloaded=True).order_by('?')
         level_0 = AppInfo.objects.filter(level__level_value=0)
         level_1 = AppInfo.objects.filter(level__level_value=1)
         level_2 = AppInfo.objects.filter(level__level_value=2)
@@ -43,7 +63,7 @@ class AppListAPI(APIView):
             "level_5": AppSerializer(level_5, many=True).data,
         }
         
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)'''
 
 
 # 추천페이지 - 어플 4개
@@ -64,7 +84,7 @@ class AppRecommendAPI(APIView):
         category=request.data.get('field')
         # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
         applist=AppInfo.objects.filter(field__name__icontains=category).order_by('level__level_value', '?')[:4]
-        appserializer = AppSerializer(applist, many=True)
+        appserializer = AppSerializer(applist, many=True, context={'request': request})
         return Response(appserializer.data, status=status.HTTP_200_OK)
 
     #def get(self, request):
@@ -89,7 +109,7 @@ class AppDetailAPI(APIView):
     
     def get(self, request,pk):
         app = get_object_or_404(AppInfo, pk = pk)
-        appserializer = AppSerializer(app)
+        appserializer = AppSerializer(app, context={'request': request})
         
         speak=f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
         tts=gTTS(text=speak, lang='ko',slow=False)
