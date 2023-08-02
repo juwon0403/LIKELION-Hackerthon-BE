@@ -45,6 +45,7 @@ urlpatterns = [
     path('recommend/', AppRecommendAPI.as_view(), name='recommendapi'),
     path('detail/<int:pk>', AppDetailAPI.as_view(), name='detailapi'),
     path('applist/', AppListAPI.as_view(), name='listapi'),
+    path('mainapplist/', MainAppListAPI.as_view(), name='mainlistapi'),
     # TTS 파일 다운로드를 위한 URL 패턴
     path('tts-file/', tts_file_view, name='tts_file'),
 

@@ -45,25 +45,33 @@ class AppListAPI(APIView):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    
-    '''def get(self, request):
-        top_app = AppInfo.objects.filter(is_downloaded=True).order_by('?')
-        level_0 = AppInfo.objects.filter(level__level_value=0)
-        level_1 = AppInfo.objects.filter(level__level_value=1)
-        level_2 = AppInfo.objects.filter(level__level_value=2)
-        level_3_4 = AppInfo.objects.filter(level__level_value__in=[3, 4])
-        level_5 = AppInfo.objects.filter(level__level_value=5)
+#카테고리 메인 페이지
+class MainAppListAPI(APIView):
+    @swagger_auto_schema(
+            tags = ['메인 카테고리 페이지 : 레벨별 2개의 어플 조회'],
+            responses = {
+                200: openapi.Response('레벨별 2개의 어플 조회 완료 : 추천어플(top_app)과 레벨별 어플(level_0, level_1, level_2, level_3_4, level_5) 구분하여 전송', AppSerializer)
+            }
+        )
+     
+    def get(self, request):
+        top_app = AppInfo.objects.filter(is_downloaded=True).order_by('?')[:2]
+        level_0 = AppInfo.objects.filter(level__level_value=0).order_by('?')[:2]
+        level_1 = AppInfo.objects.filter(level__level_value=1).order_by('?')[:2]
+        level_2 = AppInfo.objects.filter(level__level_value=2).order_by('?')[:2]
+        level_3_4 = AppInfo.objects.filter(level__level_value__in=[3, 4]).order_by('?')[:2]
+        level_5 = AppInfo.objects.filter(level__level_value=5).order_by('?')[:2]
 
         data = {
-            "top_app": AppSerializer(top_app, many=True).data,
-            "level_0": AppSerializer(level_0, many=True).data,
-            "level_1": AppSerializer(level_1, many=True).data,
-            "level_2": AppSerializer(level_2, many=True).data,
-            "level_3_4": AppSerializer(level_3_4, many=True).data,
-            "level_5": AppSerializer(level_5, many=True).data,
+            "top_app": AppSerializer(top_app, many=True, context={'request': request}).data,
+            "level_0": AppSerializer(level_0, many=True, context={'request': request}).data,
+            "level_1": AppSerializer(level_1, many=True, context={'request': request}).data,
+            "level_2": AppSerializer(level_2, many=True, context={'request': request}).data,
+            "level_3_4": AppSerializer(level_3_4, many=True, context={'request': request}).data,
+            "level_5": AppSerializer(level_5, many=True, context={'request': request}).data,
         }
-        
-        return Response(data, status=status.HTTP_200_OK)'''
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 # 추천페이지 - 어플 4개
