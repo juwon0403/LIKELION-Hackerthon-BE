@@ -16,6 +16,13 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Celery 설정
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis를 사용하여 큐 설정 (Redis 서버가 설치되어 있어야 합니다.)
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # 작업 결과를 저장할 Redis 설정
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -24,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-e#r_%7&oo21_aliys!yuz@sazz8z9*fy3ly08(qse5d&2)0n7d'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -44,6 +51,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'sslserver',
     'corsheaders',
+    'django_celery_results',  # django-celery-results 앱 추가
+    'django_celery_beat',
+    'celery',  # Celery 앱 추가
 ]
 
 MIDDLEWARE = [
@@ -139,3 +149,5 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+

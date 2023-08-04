@@ -47,7 +47,8 @@ urlpatterns = [
     path('applist/', AppListAPI.as_view(), name='listapi'),
     path('mainapplist/', MainAppListAPI.as_view(), name='mainlistapi'),
     # TTS 파일 다운로드를 위한 URL 패턴
-    path('tts-file/', tts_file_view, name='tts_file'),
+    path('tts-file/<str:filename>/', tts_file_view, name='tts_file'),
+   # path('tts-file/', tts_file_view, name='tts_file'),
 
     # Swagger url
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),

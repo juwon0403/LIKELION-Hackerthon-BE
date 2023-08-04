@@ -8,10 +8,16 @@ from gtts import gTTS
 from django.conf import settings
 from django.urls import reverse
 from django.http import FileResponse
+from .tasks import create_tts_file
+from django.views import View
+#from celery.result import AsyncResult
 import os
+import time
+import uuid
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.core.exceptions import SuspiciousOperation
 
 from django.db.models import F
 import random
@@ -101,11 +107,19 @@ class AppRecommendAPI(APIView):
       #  appserializer = AppSerializer(applist, many=True)
        # return Response(appserializer.data, status=status.HTTP_200_OK)
 
-def tts_file_view(request):
-    tts_file = os.path.join(settings.MEDIA_ROOT, 'temp_tts.mp3')
-    
-    return FileResponse(open(tts_file, 'rb'), content_type='audio/mpeg')
 
+def tts_file_view(filename):
+    # 파일 경로 생성
+    file_path = os.path.join(settings.MEDIA_ROOT, filename)
+
+    # 파일이 존재하는지 확인 후, 존재하면 False
+    if os.path.exists(file_path):
+        #with open(file_path, 'rb') as f:
+            #response = FileResponse(f, content_type='audio/mpeg')
+            return False
+    else:
+        # 파일이 존재하지 않을 경우 True
+        return True
 # 어플 상세페이지
 class AppDetailAPI(APIView):
     @swagger_auto_schema(
@@ -115,26 +129,99 @@ class AppDetailAPI(APIView):
             }
         )
     
-    def get(self, request,pk):
-        app = get_object_or_404(AppInfo, pk = pk)
+    def get(self, request, pk):
+        app = get_object_or_404(AppInfo, pk=pk)
         appserializer = AppSerializer(app, context={'request': request})
         
-        speak=f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
-        tts=gTTS(text=speak, lang='ko',slow=False)
+        speak = f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
+        temp_filename = f'temp_tts_{pk}.mp3'
+        try:
+            #만약 파일이 없으면
+            if tts_file_view(temp_filename):  
+                # TTS 생성 작업 
+                tts_url = create_tts_file(speak, pk)
+            
+            tts_ur = settings.MEDIA_URL + temp_filename
+            ## 완전한 TTS 파일 URL 구하기
+            tts_url2 = request.build_absolute_uri(tts_ur)
+
+            
+            return Response({"app_info": appserializer.data, "tts": tts_url2}, status=status.HTTP_200_OK)
+        except SuspiciousOperation as e:
+            # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
+            return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)
+    
+    '''def get(self, request, pk):
+        app = get_object_or_404(AppInfo, pk=pk)
+        appserializer = AppSerializer(app, context={'request': request})
         
-         # TTS를 임시 파일로 저장
-        tts_file = os.path.join(settings.MEDIA_ROOT, 'temp_tts.mp3')
-        tts.save(tts_file)
+        speak = f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
 
-        # 임시 파일의 URL 구하기
-        tts_url = request.build_absolute_uri(reverse('tts_file'))
+        try:
+            # TTS 생성 작업을 Celery로 실행
+            urur = create_tts_file.delay(speak, pk)
+            task_id = urur.id
+            
+            # 작업 완료를 대기하기 위해 반복문 사용
+            while not urur.ready():
+                time.sleep(1)  # 1초 대기
+            
+            # 완전한 TTS 파일 URL 구하기
+            tts_filename = f'temp_tts_{pk}.mp3'
+            tts_full_url = request.build_absolute_uri(reverse('tts_file', kwargs={'filename': tts_filename}))
+            # response에 TTS 파일 URL을 원하는 형식으로 반환
+            return Response({"app_info": appserializer.data, "tts": tts_full_url}, status=status.HTTP_200_OK)
+        except SuspiciousOperation as e:
+            # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
+            return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)'''
 
-        # 임시 파일 삭제 (필요에 따라 삭제하지 않을 수도 있습니다.)
-        # import os
-        # os.remove(tts_file)
+   
+        
+    '''def get(self, request, pk):
+        app = get_object_or_404(AppInfo, pk=pk)
+        appserializer = AppSerializer(app, context={'request': request})
+        
+        speak = f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
 
-        #return response
+        try:
+            # TTS 생성 작업을 Celery로 실행
+            urur = create_tts_file.delay(speak,pk)
+            taskid = urur.id
 
-        return Response({"app_info":appserializer.data, "tts":tts_url},status=status.HTTP_200_OK)
+            # 파일 이름에 고유한 식별자를 추가하여 TTS 파일 저장
+            unique_filename = f"temp_tts_{uuid.uuid4().hex}.mp3"
+            tts_file = os.path.join(settings.MEDIA_ROOT, unique_filename)
+
+            # 완전한 TTS 파일 URL 구하기
+            tts_url = request.build_absolute_uri(reverse('tts_file', kwargs={'task_id': taskid}))
+
+            # response에 TTS 파일 URL은 넣지 않고, 바로 상세 정보만 응답합니다.
+            return Response({"app_info": appserializer.data, "tts": tts_url}, status=status.HTTP_200_OK)
+        except SuspiciousOperation as e:
+            # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
+            return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)
+'''
+
+    '''def get(self, request, pk):
+        app = get_object_or_404(AppInfo, pk=pk)
+        appserializer = AppSerializer(app, context={'request': request})
+        
+        speak = f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
+
+        try:
+            # TTS 생성 작업을 Celery로 실행
+            urur = create_tts_file.delay(speak,task_id=pk)
+            taskid = urur.id
+            
+            # 완전한 TTS 파일 URL 구하기
+            tts_url = request.build_absolute_uri(reverse('tts_file', kwargs={'task_id': taskid}))
+
+            # response에 TTS 파일 URL은 넣지 않고, 바로 상세 정보만 응답합니다.
+            return Response({"app_info": appserializer.data, "tts": tts_url}, status=status.HTTP_200_OK)
+        except SuspiciousOperation as e:
+            # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
+            return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)'''
+ 
+
     
     
