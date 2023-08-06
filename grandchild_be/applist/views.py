@@ -221,7 +221,3 @@ class AppDetailAPI(APIView):
         except SuspiciousOperation as e:
             # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
             return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)'''
- 
-
-    
-    
