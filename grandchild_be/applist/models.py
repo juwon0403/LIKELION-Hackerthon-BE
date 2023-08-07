@@ -1,4 +1,5 @@
 from django.db import models
+import random
 
 
 # 어플 난이도
@@ -32,6 +33,9 @@ class CategoryTag(models.Model):
     class Meta:
         verbose_name_plural = "Category Tags"
 
+def random_default_value():
+    return random.randint(1, 100)
+
 # 어플 정보
 class AppInfo(models.Model):
     name = models.CharField(max_length=30)
@@ -44,8 +48,8 @@ class AppInfo(models.Model):
     alink = models.TextField(null=True, blank=True)
     is_downloaded = models.BooleanField() # True일 경우, 추천페이지에서 제외
     field = models.ManyToManyField(CategoryTag,related_name='tag') # 추천페이지에서 사용
-    like=models.IntegerField(default=0)
-
+    like = models.IntegerField(default=random_default_value)
+    
     def __str__(self):
         return f"{self.name} : Level {self.level.level_value}"
     
