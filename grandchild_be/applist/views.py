@@ -27,7 +27,7 @@ import random
 # 카테고리 페이지
 class AppListAPI(APIView):
     @swagger_auto_schema(
-            tags = ['카테고리 페이지 : 모든 어플 조회'],
+            tags = ['카테고리 페이지 : 어플 조회'],
             responses = {
                 200: openapi.Response('모든 어플 조회 완료 : 추천어플(top_app)과 레벨별 어플(level_0, level_1, level_2, level_3_4, level_5) 구분하여 전송', AppSerializer)
             }
@@ -55,9 +55,9 @@ class AppListAPI(APIView):
 #카테고리 메인 페이지
 class MainAppListAPI(APIView):
     @swagger_auto_schema(
-            tags = ['메인 카테고리 페이지 : 레벨별 2개의 어플 조회'],
+            tags = ['카테고리 페이지 : 어플 조회'],
             responses = {
-                200: openapi.Response('레벨별 2개의 어플 조회 완료 : 추천어플(top_app)과 레벨별 어플(level_0, level_1, level_2, level_3_4, level_5) 구분하여 전송', AppSerializer)
+                200: openapi.Response('레벨별 어플 2개 조회 완료 : 추천어플(top_app)과 레벨별 어플(level_0, level_1, level_2, level_3_4, level_5) 구분하여 전송', AppSerializer)
             }
         )
      
@@ -84,7 +84,7 @@ class MainAppListAPI(APIView):
 # 추천페이지 - 어플 4개
 class AppRecommendAPI(APIView):
     @swagger_auto_schema(
-        tags = ['추천 페이지 : 어플 4가지 추천'],
+        tags = ['추천 페이지 : 어플 4개 추천'],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT, 
             properties={
@@ -153,6 +153,13 @@ class AppDetailAPI(APIView):
             # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
             return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+         tags = ['상세 페이지 : 어플 상세조회'],
+            responses = {
+                200: openapi.Response('id에 따른 어플 좋아요 +1 완료')
+            }
+        )
+    
     def post(self, request, pk):
         app = AppInfo.objects.get(pk=pk)
         
