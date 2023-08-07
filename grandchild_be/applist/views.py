@@ -1,4 +1,4 @@
-from django.shortcuts import render,get_object_or_404,HttpResponse
+from django.shortcuts import render,get_object_or_404, HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,6 +8,7 @@ from gtts import gTTS
 from django.conf import settings
 from django.urls import reverse
 from django.http import FileResponse
+from django.contrib import auth
 from .tasks import create_tts_file
 from django.views import View
 #from celery.result import AsyncResult
@@ -94,6 +95,7 @@ class AppRecommendAPI(APIView):
                 200: openapi.Response('입력받은 field와 관련된 어플 4가지 정렬 : 레벨 오름차순 + 같은 레벨일경우 랜덤', AppSerializer)
             }
         )
+    
     def post(self,request):
         category=request.data.get('field')
         # 어플들을 레벨 오름차순 + 같은 레벨일 경우 랜덤으로 정렬
@@ -133,7 +135,7 @@ class AppDetailAPI(APIView):
         app = get_object_or_404(AppInfo, pk=pk)
         appserializer = AppSerializer(app, context={'request': request})
         
-        speak = f":어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
+        speak = f"어플 이름: {app.name}. 레벨: {app.level.level_comment}. 요약: {app.summary}. 상세: {app.detail}."
         temp_filename = f'temp_tts_{pk}.mp3'
         try:
             #만약 파일이 없으면
@@ -150,7 +152,17 @@ class AppDetailAPI(APIView):
         except SuspiciousOperation as e:
             # 예외 처리: TTS 작업이 제대로 실행되지 않았을 경우
             return Response({"app_info": appserializer.data, "tts": None}, status=status.HTTP_200_OK)
+
+    def post(self, request, pk):
+        app = AppInfo.objects.get(pk=pk)
+        
+        app.like += 1
+        app.save()
+        
+        return Response({"message": "App liked successfully."}, status=status.HTTP_200_OK)
     
+    
+
     '''def get(self, request, pk):
         app = get_object_or_404(AppInfo, pk=pk)
         appserializer = AppSerializer(app, context={'request': request})

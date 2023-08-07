@@ -44,6 +44,7 @@ class AppInfo(models.Model):
     alink = models.TextField(null=True, blank=True)
     is_downloaded = models.BooleanField() # True일 경우, 추천페이지에서 제외
     field = models.ManyToManyField(CategoryTag,related_name='tag') # 추천페이지에서 사용
+    like=models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.name} : Level {self.level.level_value}"
